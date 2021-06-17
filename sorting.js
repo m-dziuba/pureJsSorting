@@ -1,98 +1,123 @@
-const container = document.querySelector(".data-container");
-const containerWidth = container.offsetWidth
-const containerHeight = container.offsetHeight
-
+"use strict";
 
 class Algorithm {
-  constructor (num = 30) {
-    this.array = Array.from({length: num}, () => Math.floor(Math.random() * num));
+  constructor(num = 30, delay = 300) {
+    this.num = num;
+    this.delay = delay;
+    this.container = document.querySelector(".data-container");
+    this.bars = document.querySelectorAll(".bars");
+    this.array = Array.from({ length: num }, () =>
+      Math.floor(Math.random() * num)
+    );
   }
-}
-
-
-function generateBars(num = 30) {
-  const array = Array.from({length: num}, () => Math.floor(Math.random() * num));
-  for (let i = 0; i < num; i += 1) {
-    const barWidth = containerWidth / num
-    const value = array[i]
-    const bar = document.createElement("div");
-    bar.classList.add("bar");
-    bar.style.width = `${barWidth}px`
-    bar.style.height = `${containerHeight / num * value}px`;
-    bar.style.transform = `translateX(${i * barWidth}px)`;
-    const barLabel = document.createElement("label");
-    barLabel.classList.add("bar_id");
-    barLabel.innerHTML = value.toString();
-    bar.appendChild(barLabel);
-    container.appendChild(bar);
-  }
-}
-
-async function SelectionSort(delay = 300) {
-  let bars = document.querySelectorAll(".bar");
-  let minIndex = 0;
-  for (let i = 0; i < bars.length; i++) {
-    minIndex = i;
-    bars[i].style.backgroundColor = "darkblue";
-    for (let j = i + 1; j < bars.length; j += 1) {
-      bars[j].style.backgroundColor = "red";
-
-      await new Promise((resolve) =>
-        setTimeout(() => {
-          resolve();
-        }, delay)
-      );
-      console.log(bars[j].firstChild.innerHTML)
-
-      let val1 = parseInt(bars[j].firstChild.innerHTML, 10);
-      let val2 = parseInt(bars[minIndex].firstChild.innerHTML, 10);
-
-      if (val1 < val2) {
-        if (minIndex !== i) {
-          bars[minIndex].style.backgroundColor = "  rgb(24, 190, 255)";
-        }
-        minIndex = j;
-      } else {
-        bars[j].style.backgroundColor = "  rgb(24, 190, 255)";
-      }
+  generateBars() {
+    for (let i = 0; i < this.num; i += 1) {
+      const barWidth = this.container.offsetWidth / this.num;
+      const value = this.array[i];
+      const bar = document.createElement("div");
+      bar.classList.add("bar");
+      bar.style.width = `${barWidth}px`;
+      bar.style.height = `${
+        (this.container.offsetHeight / this.num) * value
+      }px`;
+      bar.style.border = "solid 1px";
+      bar.style.transform = `translateX(${i * barWidth}px)`;
+      const barLabel = document.createElement("label");
+      barLabel.classList.add("bar_id");
+      barLabel.innerHTML = value.toString();
+      bar.appendChild(barLabel);
+      this.container.appendChild(bar);
     }
+    this.bars = document.querySelectorAll(".bar");
+  }
 
-    let temp1 = bars[minIndex].style.height;
-    let temp2 = bars[minIndex].firstChild.innerHTML;
-    bars[minIndex].style.height = bars[i].style.height;
-    bars[i].style.height = temp1;
-    bars[minIndex].firstChild.innerText = bars[i].firstChild.innerHTML;
-    bars[i].firstChild.innerText = temp2;
+  inspected(index) {
+    this.bars[index].setAttribute("class", "bar inspected");
+  }
 
+  compared(index) {
+    this.bars[index].setAttribute("class", "bar compared");
+  }
+
+  finished(index) {
+    this.bars[index].setAttribute("class", "bar finished");
+  }
+
+  unmark(index) {
+    this.bars[index].setAttribute("class", "bar");
+  }
+
+  async pause() {
     await new Promise((resolve) =>
       setTimeout(() => {
         resolve();
-      }, delay)
+      }, this.delay)
     );
-
-    // Provide skyblue color to the (min-idx)th bar
-    bars[minIndex].style.backgroundColor = "  rgb(24, 190, 255)";
-
-    // Provide lightgreen color to the ith bar
-    bars[i].style.backgroundColor = " rgb(49, 226, 13)";
   }
-  document.getElementById("Button1").disabled = false;
-  document.getElementById("Button1").style.backgroundColor = "#6f459e";
 
-  // To enable the button "Selection Sort" after final(sorted)
-  document.getElementById("Button2").disabled = false;
-  document.getElementById("Button2").style.backgroundColor = "#6f459e";
+  compare(index1, index2) {
+    let value1 = parseInt(this.bars[index1].firstChild.innerHTML, 10);
+    let value2 = parseInt(this.bars[index2].firstChild.innerHTML, 10);
+    return value1 > value2;
+  }
+
+  swap(index1, index2) {
+    let value1 = parseInt(this.bars[index1].firstChild.innerHTML, 10);
+    let value2 = parseInt(this.bars[index2].firstChild.innerHTML, 10);
+    this.bars[index1].firstChild.innerHTML = value2;
+    this.bars[index1].style.height = `${
+      (this.container.offsetHeight / this.num) * value2
+    }px`;
+    this.bars[index2].firstChild.innerHTML = value1;
+    this.bars[index2].style.height = `${
+      (this.container.offsetHeight / this.num) * value1
+    }px`;
+  }
+
+  async selectionSort() {
+    let minIndex = 0;
+    for (let i = 0; i < this.bars.length; i++) {
+      minIndex = i;
+      this.compared(i);
+      for (let j = i + 1; j < this.bars.length; j++) {
+        this.inspected(j);
+
+        await this.pause(300);
+
+        if (this.compare(minIndex, j)) {
+          if (minIndex !== i) {
+            this.unmark(minIndex);
+          }
+          minIndex = j;
+        } else {
+          this.unmark(j);
+        }
+      }
+      this.swap(i, minIndex);
+      await this.pause(300);
+      this.unmark(minIndex);
+      this.finished(i);
+    }
+    document.getElementById("Button1").disabled = false;
+    document.getElementById("Button1").style.backgroundColor = "#6f459e";
+
+    // To enable the button "Selection Sort" after final(sorted)
+    document.getElementById("Button2").disabled = false;
+    document.getElementById("Button2").style.backgroundColor = "#6f459e";
+  }
 }
 
-generateBars();
+let algo = new Algorithm(100, 0);
+algo.generateBars();
 
 function generate() {
   window.location.reload();
 }
-function disable() {
-  document.getElementById("Button1").disabled = true;
-  document.getElementById("Button1").style.backgroundColor = "#d8b6ff";
 
-  document.getElementById("Button2").disabled = true;
-  document.getElementById("Button2").style.backgroundColor = "#d8b6ff";
-}
+// function disable() {
+// document.getElementById("Button1").disabled = true;
+// document.getElementById("Button1").style.backgroundColor = "#d8b6ff";
+//
+// document.getElementById("Button2").disabled = true;
+// document.getElementById("Button2").style.backgroundColor = "#d8b6ff";
+// }
