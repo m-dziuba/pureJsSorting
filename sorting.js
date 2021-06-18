@@ -58,6 +58,11 @@ class Algorithm {
   compare(index1, index2) {
     let value1 = parseInt(this.bars[index1].firstChild.innerHTML, 10);
     let value2 = parseInt(this.bars[index2].firstChild.innerHTML, 10);
+    if (value1 > value2) {
+      return true;
+    } else if (value1 >= value2) {
+      return "largerOrEqual";
+    }
     return value1 > value2;
   }
 
@@ -124,9 +129,26 @@ class Algorithm {
     let swapping = true;
     let passes = 0;
 
-    // To enable the button "Selection Sort" after final(sorted)
-    document.getElementById("Button2").disabled = false;
-    document.getElementById("Button2").style.backgroundColor = "#6f459e";
+    while (swapping) {
+      swapping = false;
+      for (let i = 0; i < this.bars.length - passes - 1; i++) {
+        this.inspected(i);
+        this.compared(i + 1);
+
+        await this.pause();
+
+        if (this.compare(i, i + 1)) {
+          this.swap(i, i + 1);
+          swapping = true;
+          await this.pause();
+        }
+        this.unmark(i);
+        this.compared(i + 1);
+        await this.pause();
+      }
+      this.finished(this.bars.length - passes - 1);
+      passes += 1;
+    }
   }
 }
 
