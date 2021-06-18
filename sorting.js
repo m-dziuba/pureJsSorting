@@ -47,28 +47,27 @@ class Algorithm {
     this.bars[index].setAttribute("class", "bar");
   }
 
-  async pause() {
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        resolve();
-      }, this.delay)
-    );
+  pause = (delay = this.delay) => new Promise((res) => setTimeout(res, delay));
+
+  evaluate(index) {
+    return parseInt(this.bars[index].firstChild.innerHTML, 10);
   }
 
   compare(index1, index2) {
-    let value1 = parseInt(this.bars[index1].firstChild.innerHTML, 10);
-    let value2 = parseInt(this.bars[index2].firstChild.innerHTML, 10);
+    let value1 = this.evaluate(index1);
+    let value2 = this.evaluate(index2);
     if (value1 > value2) {
       return true;
     } else if (value1 >= value2) {
+      console.log("largerOrEqual");
       return "largerOrEqual";
     }
     return value1 > value2;
   }
 
   swap(index1, index2) {
-    let value1 = parseInt(this.bars[index1].firstChild.innerHTML, 10);
-    let value2 = parseInt(this.bars[index2].firstChild.innerHTML, 10);
+    let value1 = this.evaluate(index1);
+    let value2 = this.evaluate(index2);
     this.bars[index1].firstChild.innerHTML = value2;
     this.bars[index1].style.height = `${
       (this.container.offsetHeight / this.num) * value2
@@ -79,21 +78,10 @@ class Algorithm {
     }px`;
   }
 
-  move(whereTo, index) {
-    this.bars[index].style.transform = `translateX(${
-      whereTo * this.barWidth
-    }px)`;
-    for (let i = whereTo + 1; i < this.bars.length; i++) {
-      this.bars[i].style.transform = `translateX(${i * this.barWidth}px)`;
-    }
-    console.log("moved");
-  }
-
   enableButtons() {
     document.getElementById("Button1").disabled = false;
     document.getElementById("Button1").style.backgroundColor = "#6f459e";
 
-    // To enable the button "Selection Sort" after final(sorted)
     document.getElementById("Button2").disabled = false;
     document.getElementById("Button2").style.backgroundColor = "#6f459e";
   }
@@ -102,11 +90,11 @@ class Algorithm {
     let minIndex = 0;
     for (let i = 0; i < this.bars.length; i++) {
       minIndex = i;
-      this.compared(i);
+      this.inspected(i);
       for (let j = i + 1; j < this.bars.length; j++) {
-        this.inspected(j);
+        this.compared(j);
 
-        await this.pause(300);
+        await this.pause();
 
         if (this.compare(minIndex, j)) {
           if (minIndex !== i) {
@@ -132,8 +120,8 @@ class Algorithm {
     while (swapping) {
       swapping = false;
       for (let i = 0; i < this.bars.length - passes - 1; i++) {
-        this.inspected(i);
-        this.compared(i + 1);
+        this.compared(i);
+        this.inspected(i + 1);
 
         await this.pause();
 
@@ -143,11 +131,28 @@ class Algorithm {
           await this.pause();
         }
         this.unmark(i);
-        this.compared(i + 1);
+        this.inspected(i + 1);
         await this.pause();
       }
       this.finished(this.bars.length - passes - 1);
       passes += 1;
+    }
+  }
+
+  //TODO fix markup
+  async insertionSort() {
+    for (let i = 1; i < this.bars.length; i++) {
+      this.inspected(i);
+      await this.pause();
+      for (let j = i; j > 0 && this.evaluate(j) < this.evaluate(j - 1); j--) {
+        this.swap(j - 1, j);
+      }
+      this.unmark(i);
+    }
+
+    for (let i = 0; i < this.bars.length; i++) {
+      this.finished(i);
+      await this.pause(50);
     }
   }
 }

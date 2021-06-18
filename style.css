@@ -65,10 +65,10 @@ body {
     background:  rgb(24, 190, 255);
 }
 .inspected{
-    background: red;
+    background: darkblue;
 }
 .compared{
-    background: darkblue;
+    background: red;
 }
 .finished{
     background: rgb(49, 226, 13);
