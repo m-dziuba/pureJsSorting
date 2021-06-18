@@ -74,6 +74,25 @@ class Algorithm {
     }px`;
   }
 
+  move(whereTo, index) {
+    this.bars[index].style.transform = `translateX(${
+      whereTo * this.barWidth
+    }px)`;
+    for (let i = whereTo + 1; i < this.bars.length; i++) {
+      this.bars[i].style.transform = `translateX(${i * this.barWidth}px)`;
+    }
+    console.log("moved");
+  }
+
+  enableButtons() {
+    document.getElementById("Button1").disabled = false;
+    document.getElementById("Button1").style.backgroundColor = "#6f459e";
+
+    // To enable the button "Selection Sort" after final(sorted)
+    document.getElementById("Button2").disabled = false;
+    document.getElementById("Button2").style.backgroundColor = "#6f459e";
+  }
+
   async selectionSort() {
     let minIndex = 0;
     for (let i = 0; i < this.bars.length; i++) {
@@ -98,8 +117,12 @@ class Algorithm {
       this.unmark(minIndex);
       this.finished(i);
     }
-    document.getElementById("Button1").disabled = false;
-    document.getElementById("Button1").style.backgroundColor = "#6f459e";
+    this.enableButtons();
+  }
+
+  async bubbleSort() {
+    let swapping = true;
+    let passes = 0;
 
     // To enable the button "Selection Sort" after final(sorted)
     document.getElementById("Button2").disabled = false;
@@ -107,7 +130,7 @@ class Algorithm {
   }
 }
 
-let algo = new Algorithm(100, 0);
+let algo = new Algorithm(30, 300);
 algo.generateBars();
 
 function generate() {
