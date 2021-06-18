@@ -11,27 +11,35 @@ class Algorithm {
     );
   }
   generateBars() {
+    this.container.innerHTML = "";
+    const svgNs = "http://www.w3.org/2000/svg";
+    const maxHeight = this.container.offsetHeight;
+    const maxWidth = this.container.offsetWidth;
+    const barWidth = maxWidth / this.num;
+
+    const svgCanvas = document.createElementNS(svgNs, "svg");
+    svgCanvas.setAttribute("height", `${maxHeight}`);
+    svgCanvas.setAttribute("width", `${maxWidth}`);
+    svgCanvas.setAttribute("id", "svgOne");
+    this.container.appendChild(svgCanvas);
+
     for (let i = 0; i < this.num; i += 1) {
-      const barWidth = this.container.offsetWidth / this.num;
+      const bar = document.createElementNS(svgNs, "rect");
       const value = this.array[i];
-      const bar = document.createElement("div");
-      bar.classList.add("bar");
-      bar.style.width = `${barWidth}px`;
-      bar.style.height = `${
-        (this.container.offsetHeight / this.num) * value
-      }px`;
-      bar.style.border = "solid 1px";
-      bar.style.transform = `translateX(${i * barWidth}px)`;
-      const barLabel = document.createElement("label");
-      barLabel.classList.add("bar_id");
-      barLabel.innerHTML = value.toString();
-      bar.appendChild(barLabel);
-      this.container.appendChild(bar);
+
+      bar.setAttribute("width", `${barWidth}`);
+      bar.setAttribute("height", `${(maxHeight / this.num) * value}`);
+      bar.setAttribute("x", `${i * barWidth}`);
+      bar.setAttribute("y", `${maxHeight - (maxHeight / this.num) * value}`);
+      bar.setAttribute("class", "bar");
+
+      document.getElementById("svgOne").appendChild(bar);
     }
     this.bars = document.querySelectorAll(".bar");
   }
 
   inspected(index) {
+    console.log(this.bars);
     this.bars[index].setAttribute("class", "bar inspected");
   }
 
@@ -139,25 +147,57 @@ class Algorithm {
     }
   }
 
-  //TODO fix markup
   async insertionSort() {
-    for (let i = 1; i < this.bars.length; i++) {
-      this.inspected(i);
-      await this.pause();
-      for (let j = i; j > 0 && this.evaluate(j) < this.evaluate(j - 1); j--) {
-        this.swap(j - 1, j);
+    for (let i = 1; i < this.array.length; i++) {
+      for (let j = i; j > 0 && this.array[j] < this.array[j - 1]; j--) {
+        this.unmark(j);
+        this.inspected(i);
+        this.compared(j - 1);
+        await this.pause();
+        [this.array[j], this.array[j - 1]] = [this.array[j - 1], this.array[j]];
       }
+      this.generateBars();
       this.unmark(i);
     }
 
     for (let i = 0; i < this.bars.length; i++) {
       this.finished(i);
-      await this.pause(50);
+      await this.pause(1);
+    }
+  }
+
+  async mergeSort(startIndex = null, endIndex = null) {
+    if (startIndex === null) {
+      [startIndex, endIndex] = [0, this.bars.length];
+    }
+    if (endIndex - startIndex > 1) {
+      let middleIndex = Math.round((endIndex + startIndex) / 2);
+      await this.mergeSort(startIndex, middleIndex);
+      await this.mergeSort(middleIndex, endIndex);
+      let i = 0;
+      let j = 0;
+      for (let k = startIndex; k < endIndex; k++) {
+        this.inspected(k);
+        if (i + 1 < endIndex - startIndex && j * 2 < endIndex - startIndex) {
+          this.compared(middleIndex + j);
+          await this.pause();
+          if (this.evaluate(startIndex + i) < this.evaluate(middleIndex + j)) {
+            i++;
+          } else {
+            for (let i = k; i > middleIndex + j; i--) {
+              this.swap(k - 1, k);
+              i++;
+              j++;
+            }
+          }
+        }
+        this.unmark(k);
+      }
     }
   }
 }
 
-let algo = new Algorithm(30, 300);
+let algo = new Algorithm(200, 0);
 algo.generateBars();
 
 function generate() {

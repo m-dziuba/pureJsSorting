@@ -26,11 +26,9 @@ body {
 }
 
 .bar {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    background-color: rgb(0, 183, 255);
-    transition: 0.2s all ease;
+    fill: rgb(24, 190, 255);
+    stroke: black;
+
 }
 
 .bar__id {
@@ -61,15 +59,12 @@ body {
     border: white;
 }
 
-.omitted{
-    background:  rgb(24, 190, 255);
-}
 .inspected{
-    background: darkblue;
+    fill: darkblue;
 }
 .compared{
-    background: red;
+    fill: red;
 }
 .finished{
-    background: rgb(49, 226, 13);
+    fill: rgb(49, 226, 13);
 }
