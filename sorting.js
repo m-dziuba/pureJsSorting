@@ -3,61 +3,112 @@ Array.prototype.insert = function (index, item) {
   this.splice(index, 0, item);
 };
 
-class Algorithm {
-  constructor(num = 30, delay = 300) {
-    this.num = num;
+class Visualizer {
+  constructor(array, delay) {
+    this.array = array;
     this.delay = delay;
     this.container = document.querySelector(".data-container");
-    this.bars = document.querySelectorAll(".bars");
-    this.array = Array.from({ length: num }, () =>
-      Math.floor(Math.random() * num)
+    this.canvas = document.getElementById("canvas");
+    this.context = this.canvas.getContext("2d");
+    this.maxHeight = Number(this.container.offsetHeight);
+    this.maxWidth = Number(this.container.offsetWidth);
+    this.width = Number(this.maxWidth / this.array.length);
+  }
+
+  init() {
+    this.container.innerHTML = "";
+    this.canvas.setAttribute("height", `${this.maxHeight}`);
+    this.canvas.setAttribute("width", `${this.maxWidth}`);
+    this.container.appendChild(this.canvas);
+    this.context.fillStyle = "rgb(24, 190, 255)";
+    this.context.strokeStyle = "black";
+    this.context.lineWidth = 2;
+    this.context.save();
+  }
+
+  x(index) {
+    return this.width * index;
+  }
+
+  y(index) {
+    return (
+      this.maxHeight - (this.maxHeight / this.array.length) * this.array[index]
     );
   }
+
+  height(index) {
+    return (this.maxHeight / this.array.length) * this.array[index];
+  }
+
+  drawOneBar(index) {
+    this.context.clearRect(this.x(index), 0, this.width, this.maxHeight);
+    this.context.beginPath();
+    this.context.rect(
+      this.x(index),
+      this.y(index),
+      this.width,
+      this.height(index)
+    );
+    this.context.stroke();
+    this.context.fill();
+    this.context.restore();
+  }
+
   generateBars() {
-    this.container.innerHTML = "";
-    const svgNs = "http://www.w3.org/2000/svg";
-    const maxHeight = this.container.offsetHeight;
-    const maxWidth = this.container.offsetWidth;
-    const barWidth = maxWidth / this.num;
-
-    const svgCanvas = document.createElementNS(svgNs, "svg");
-    svgCanvas.setAttribute("height", `${maxHeight}`);
-    svgCanvas.setAttribute("width", `${maxWidth}`);
-    svgCanvas.setAttribute("id", "svgOne");
-    this.container.appendChild(svgCanvas);
-
-    for (let i = 0; i < this.num; i += 1) {
-      const bar = document.createElementNS(svgNs, "rect");
-      const value = this.array[i];
-
-      bar.setAttribute("width", `${barWidth}`);
-      bar.setAttribute("height", `${(maxHeight / this.num) * value}`);
-      bar.setAttribute("x", `${i * barWidth}`);
-      bar.setAttribute("y", `${maxHeight - (maxHeight / this.num) * value}`);
-      bar.setAttribute("class", "bar");
-
-      document.getElementById("svgOne").appendChild(bar);
+    for (let i = 0; i < this.array.length; i += 1) {
+      this.drawOneBar(i);
     }
-    this.bars = document.querySelectorAll(".bar");
   }
 
   inspected(index) {
-    this.bars[index].setAttribute("class", "bar inspected");
+    this.context.save();
+    this.context.fillStyle = "darkblue";
+    this.drawOneBar(index);
   }
 
   compared(index) {
-    this.bars[index].setAttribute("class", "bar compared");
+    this.context.save();
+    this.context.fillStyle = "red";
+    this.drawOneBar(index);
   }
 
   finished(index) {
-    this.bars[index].setAttribute("class", "bar finished");
+    this.context.save();
+    this.context.fillStyle = "green";
+    this.drawOneBar(index);
   }
 
   unmark(index) {
-    this.bars[index].setAttribute("class", "bar");
+    this.drawOneBar(index);
   }
 
   pause = (delay = this.delay) => new Promise((res) => setTimeout(res, delay));
+
+  enableButtons() {
+    document.getElementById("Button1").disabled = false;
+    document.getElementById("Button1").style.backgroundColor = "#6f459e";
+
+    document.getElementById("Button2").disabled = false;
+    document.getElementById("Button2").style.backgroundColor = "#6f459e";
+  }
+
+  disableButtons() {
+    document.getElementById("Button1").disabled = true;
+    document.getElementById("Button1").style.backgroundColor = "#d8b6ff";
+
+    document.getElementById("Button2").disabled = true;
+    document.getElementById("Button2").style.backgroundColor = "#d8b6ff";
+  }
+}
+
+class Algorithm {
+  constructor(num = 30, delay = 300) {
+    this.num = num;
+    this.array = Array.from({ length: num }, () =>
+      Math.floor(Math.random() * num)
+    );
+    this.visualizer = new Visualizer(this.array, delay);
+  }
 
   compare(index1, index2) {
     let value1 = this.array[index1];
@@ -75,41 +126,32 @@ class Algorithm {
       this.array[index2],
       this.array[index1],
     ];
-    this.generateBars();
-  }
-
-  enableButtons() {
-    document.getElementById("Button1").disabled = false;
-    document.getElementById("Button1").style.backgroundColor = "#6f459e";
-
-    document.getElementById("Button2").disabled = false;
-    document.getElementById("Button2").style.backgroundColor = "#6f459e";
+    this.visualizer.generateBars();
   }
 
   async selectionSort() {
     let minIndex = 0;
     for (let i = 0; i < this.array.length; i++) {
       minIndex = i;
-      this.inspected(i);
+      this.visualizer.inspected(i);
       for (let j = i + 1; j < this.array.length; j++) {
-        this.compared(j);
-        await this.pause();
+        this.visualizer.compared(j);
+        await this.visualizer.pause();
 
         if (this.compare(minIndex, j)) {
           if (minIndex !== i) {
-            this.unmark(minIndex);
+            this.visualizer.unmark(minIndex);
           }
           minIndex = j;
         } else {
-          this.unmark(j);
+          this.visualizer.unmark(j);
         }
       }
       this.swap(i, minIndex);
-      await this.pause(300);
-      this.unmark(minIndex);
-      this.finished(i);
+      await this.visualizer.pause(300);
+      this.visualizer.unmark(minIndex);
+      this.visualizer.finished(i);
     }
-    this.enableButtons();
   }
 
   async bubbleSort() {
@@ -119,21 +161,21 @@ class Algorithm {
     while (swapping) {
       swapping = false;
       for (let i = 0; i < this.array.length - passes - 1; i++) {
-        this.compared(i);
-        this.inspected(i + 1);
+        this.visualizer.compared(i);
+        this.visualizer.inspected(i + 1);
 
-        await this.pause();
+        await this.visualizer.pause();
 
         if (this.compare(i, i + 1)) {
           this.swap(i, i + 1);
           swapping = true;
-          await this.pause();
+          await this.visualizer.pause();
         }
-        this.unmark(i);
-        this.inspected(i + 1);
-        await this.pause();
+        this.visualizer.unmark(i);
+        this.visualizer.inspected(i + 1);
+        await this.visualizer.pause();
       }
-      this.finished(this.array.length - passes - 1);
+      this.visualizer.finished(this.array.length - passes - 1);
       passes += 1;
     }
   }
@@ -141,19 +183,19 @@ class Algorithm {
   async insertionSort() {
     for (let i = 1; i < this.array.length; i++) {
       for (let j = i; j > 0 && this.array[j] < this.array[j - 1]; j--) {
-        this.unmark(j);
-        this.inspected(i);
-        this.compared(j - 1);
-        await this.pause();
+        this.visualizer.unmark(j);
+        this.visualizer.inspected(i);
+        this.visualizer.compared(j - 1);
+        await this.visualizer.pause();
         [this.array[j], this.array[j - 1]] = [this.array[j - 1], this.array[j]];
       }
-      this.generateBars();
-      this.unmark(i);
+      this.visualizer.generateBars();
+      this.visualizer.unmark(i);
     }
 
     for (let i = 0; i < this.array.length; i++) {
-      this.finished(i);
-      await this.pause(1);
+      this.visualizer.finished(i);
+      await this.visualizer.pause(1);
     }
   }
 
@@ -168,10 +210,10 @@ class Algorithm {
       let i = 0;
       let j = 0;
       for (let k = startIndex; k < endIndex; k++) {
-        this.inspected(k);
+        this.visualizer.inspected(k);
         if (i + 1 < endIndex - startIndex && j * 2 < endIndex - startIndex) {
-          this.compared(middleIndex + j);
-          await this.pause();
+          this.visualizer.compared(middleIndex + j);
+          await this.visualizer.pause();
           if (this.array[startIndex + i] < this.array[middleIndex + j]) {
             i++;
           } else {
@@ -179,10 +221,10 @@ class Algorithm {
             i++;
             j++;
             this.array.splice(middleIndex + j, 1);
-            this.generateBars();
+            this.visualizer.generateBars();
           }
         }
-        this.unmark(k);
+        this.visualizer.unmark(k);
       }
     }
   }
@@ -194,13 +236,13 @@ class Algorithm {
     if (endIndex - startIndex > 0) {
       let pivot = this.array[endIndex];
 
-      this.inspected(endIndex);
+      this.visualizer.inspected(endIndex);
       let i = startIndex;
 
       for (let j = startIndex; j < endIndex; j++) {
-        this.compared(j);
-        this.compared(i);
-        await this.pause();
+        this.visualizer.compared(j);
+        this.visualizer.compared(i);
+        await this.visualizer.pause();
         if (this.array[j] < pivot) {
           i++;
 
@@ -208,34 +250,27 @@ class Algorithm {
             this.array[j],
             this.array[i - 1],
           ];
-          this.generateBars();
+          this.visualizer.generateBars();
         }
-        this.unmark(i);
-        this.unmark(j);
-        await this.pause();
+        this.visualizer.unmark(i);
+        this.visualizer.unmark(j);
+        await this.visualizer.pause();
       }
       [this.array[i], this.array[endIndex]] = [
         this.array[endIndex],
         this.array[i],
       ];
-      this.generateBars();
+      this.visualizer.generateBars();
       await this.quickSort(startIndex, i - 1);
       await this.quickSort(i + 1, endIndex);
     }
   }
 }
 
-let algo = new Algorithm(300, 1);
-algo.generateBars();
+let algo = new Algorithm(300, 0);
+algo.visualizer.init();
+algo.visualizer.generateBars();
 
 function generate() {
   window.location.reload();
 }
-
-// function disable() {
-// document.getElementById("Button1").disabled = true;
-// document.getElementById("Button1").style.backgroundColor = "#d8b6ff";
-//
-// document.getElementById("Button2").disabled = true;
-// document.getElementById("Button2").style.backgroundColor = "#d8b6ff";
-// }
