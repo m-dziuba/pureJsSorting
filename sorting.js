@@ -1,4 +1,7 @@
 "use strict";
+Array.prototype.insert = function (index, item) {
+  this.splice(index, 0, item);
+};
 
 class Algorithm {
   constructor(num = 30, delay = 300) {
@@ -39,7 +42,6 @@ class Algorithm {
   }
 
   inspected(index) {
-    console.log(this.bars);
     this.bars[index].setAttribute("class", "bar inspected");
   }
 
@@ -57,33 +59,23 @@ class Algorithm {
 
   pause = (delay = this.delay) => new Promise((res) => setTimeout(res, delay));
 
-  evaluate(index) {
-    return parseInt(this.bars[index].firstChild.innerHTML, 10);
-  }
-
   compare(index1, index2) {
-    let value1 = this.evaluate(index1);
-    let value2 = this.evaluate(index2);
+    let value1 = this.array[index1];
+    let value2 = this.array[index2];
     if (value1 > value2) {
       return true;
     } else if (value1 >= value2) {
-      console.log("largerOrEqual");
       return "largerOrEqual";
     }
     return value1 > value2;
   }
 
   swap(index1, index2) {
-    let value1 = this.evaluate(index1);
-    let value2 = this.evaluate(index2);
-    this.bars[index1].firstChild.innerHTML = value2;
-    this.bars[index1].style.height = `${
-      (this.container.offsetHeight / this.num) * value2
-    }px`;
-    this.bars[index2].firstChild.innerHTML = value1;
-    this.bars[index2].style.height = `${
-      (this.container.offsetHeight / this.num) * value1
-    }px`;
+    [this.array[index1], this.array[index2]] = [
+      this.array[index2],
+      this.array[index1],
+    ];
+    this.generateBars();
   }
 
   enableButtons() {
@@ -96,12 +88,11 @@ class Algorithm {
 
   async selectionSort() {
     let minIndex = 0;
-    for (let i = 0; i < this.bars.length; i++) {
+    for (let i = 0; i < this.array.length; i++) {
       minIndex = i;
       this.inspected(i);
-      for (let j = i + 1; j < this.bars.length; j++) {
+      for (let j = i + 1; j < this.array.length; j++) {
         this.compared(j);
-
         await this.pause();
 
         if (this.compare(minIndex, j)) {
@@ -127,7 +118,7 @@ class Algorithm {
 
     while (swapping) {
       swapping = false;
-      for (let i = 0; i < this.bars.length - passes - 1; i++) {
+      for (let i = 0; i < this.array.length - passes - 1; i++) {
         this.compared(i);
         this.inspected(i + 1);
 
@@ -142,7 +133,7 @@ class Algorithm {
         this.inspected(i + 1);
         await this.pause();
       }
-      this.finished(this.bars.length - passes - 1);
+      this.finished(this.array.length - passes - 1);
       passes += 1;
     }
   }
@@ -160,7 +151,7 @@ class Algorithm {
       this.unmark(i);
     }
 
-    for (let i = 0; i < this.bars.length; i++) {
+    for (let i = 0; i < this.array.length; i++) {
       this.finished(i);
       await this.pause(1);
     }
@@ -168,10 +159,10 @@ class Algorithm {
 
   async mergeSort(startIndex = null, endIndex = null) {
     if (startIndex === null) {
-      [startIndex, endIndex] = [0, this.bars.length];
+      [startIndex, endIndex] = [0, this.array.length];
     }
     if (endIndex - startIndex > 1) {
-      let middleIndex = Math.round((endIndex + startIndex) / 2);
+      let middleIndex = Math.floor((endIndex + startIndex) / 2);
       await this.mergeSort(startIndex, middleIndex);
       await this.mergeSort(middleIndex, endIndex);
       let i = 0;
@@ -181,23 +172,60 @@ class Algorithm {
         if (i + 1 < endIndex - startIndex && j * 2 < endIndex - startIndex) {
           this.compared(middleIndex + j);
           await this.pause();
-          if (this.evaluate(startIndex + i) < this.evaluate(middleIndex + j)) {
+          if (this.array[startIndex + i] < this.array[middleIndex + j]) {
             i++;
           } else {
-            for (let i = k; i > middleIndex + j; i--) {
-              this.swap(k - 1, k);
-              i++;
-              j++;
-            }
+            this.array.insert(k, this.array[middleIndex + j]);
+            i++;
+            j++;
+            this.array.splice(middleIndex + j, 1);
+            this.generateBars();
           }
         }
         this.unmark(k);
       }
     }
   }
+
+  async quickSort(startIndex = null, endIndex = null) {
+    if (startIndex === null) {
+      [startIndex, endIndex] = [0, this.array.length - 1];
+    }
+    if (endIndex - startIndex > 0) {
+      let pivot = this.array[endIndex];
+
+      this.inspected(endIndex);
+      let i = startIndex;
+
+      for (let j = startIndex; j < endIndex; j++) {
+        this.compared(j);
+        this.compared(i);
+        await this.pause();
+        if (this.array[j] < pivot) {
+          i++;
+
+          [this.array[i - 1], this.array[j]] = [
+            this.array[j],
+            this.array[i - 1],
+          ];
+          this.generateBars();
+        }
+        this.unmark(i);
+        this.unmark(j);
+        await this.pause();
+      }
+      [this.array[i], this.array[endIndex]] = [
+        this.array[endIndex],
+        this.array[i],
+      ];
+      this.generateBars();
+      await this.quickSort(startIndex, i - 1);
+      await this.quickSort(i + 1, endIndex);
+    }
+  }
 }
 
-let algo = new Algorithm(200, 0);
+let algo = new Algorithm(300, 1);
 algo.generateBars();
 
 function generate() {
