@@ -22,7 +22,7 @@ class Visualizer {
     this.container.appendChild(this.canvas);
     this.context.fillStyle = "rgb(24, 190, 255)";
     this.context.strokeStyle = "black";
-    this.context.lineWidth = 2;
+    this.context.lineWidth = 10;
     this.context.save();
   }
 
@@ -41,6 +41,7 @@ class Visualizer {
   }
 
   drawOneBar(index) {
+    this.context.clip();
     this.context.clearRect(this.x(index), 0, this.width, this.maxHeight);
     this.context.beginPath();
     this.context.rect(
@@ -54,8 +55,8 @@ class Visualizer {
     this.context.restore();
   }
 
-  generateBars() {
-    for (let i = 0; i < this.array.length; i += 1) {
+  generateBars(from = 0, to = this.array.length) {
+    for (let i = from; i < to; i += 1) {
       this.drawOneBar(i);
     }
   }
@@ -221,7 +222,7 @@ class Algorithm {
             i++;
             j++;
             this.array.splice(middleIndex + j, 1);
-            this.visualizer.generateBars();
+            this.visualizer.generateBars(k, middleIndex + j);
           }
         }
         this.visualizer.unmark(k);
@@ -267,7 +268,7 @@ class Algorithm {
   }
 }
 
-let algo = new Algorithm(300, 0);
+let algo = new Algorithm(100, 0);
 algo.visualizer.init();
 algo.visualizer.generateBars();
 
