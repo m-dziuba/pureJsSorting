@@ -102,6 +102,7 @@ class Visualizer {
 class Algorithm {
   constructor(delay = 300) {
     this.array = this.setArraySize();
+    this.algorithm = this.selectionSort;
     this.visualizer = new Visualizer(this.array, delay);
   }
 
@@ -120,6 +121,24 @@ class Algorithm {
       return array;
     }
     this.array = array;
+  }
+
+  setAlgorithm() {
+    const algorithm = document.getElementById("algorithm").value;
+    this.setArraySize();
+    if (algorithm === "selection") {
+      console.log(1);
+      this.algorithm = this.selectionSort;
+    } else if (algorithm === "bubble") {
+      console.log(2);
+      this.algorithm = this.bubbleSort;
+    } else if (algorithm === "insertion") {
+      this.algorithm = this.insertionSort;
+    } else if (algorithm === "merge") {
+      this.algorithm = this.mergeSort;
+    } else if (algorithm === "quick") {
+      this.algorithm = this.quickSort;
+    }
   }
 
   compare(index1, index2) {
