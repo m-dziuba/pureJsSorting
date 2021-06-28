@@ -12,17 +12,16 @@ class Visualizer {
     this.context = this.canvas.getContext("2d");
     this.maxHeight = Number(this.container.offsetHeight);
     this.maxWidth = Number(this.container.offsetWidth);
-    this.width = Number(Math.floor(this.maxWidth / this.array.length));
+    this.width = 0;
   }
 
   init() {
     this.container.innerHTML = "";
+    this.width = Number(Math.floor(this.maxWidth / this.array.length));
     this.canvas.setAttribute("height", `${this.maxHeight}`);
     this.canvas.setAttribute("width", `${this.array.length * this.width}`);
     this.container.appendChild(this.canvas);
     this.context.fillStyle = "rgb(24, 190, 255)";
-    this.context.strokeStyle = "black";
-    this.context.lineWidth = 10;
     this.context.save();
   }
 
@@ -101,12 +100,26 @@ class Visualizer {
 }
 
 class Algorithm {
-  constructor(num = 30, delay = 300) {
-    this.num = num;
-    this.array = Array.from({ length: num }, () =>
-      Math.floor(Math.random() * num)
-    );
+  constructor(delay = 300) {
+    this.array = this.setArraySize();
     this.visualizer = new Visualizer(this.array, delay);
+  }
+
+  setArraySize() {
+    const arraySize = parseInt(document.getElementById("arraySize").value, 10);
+    const array = Array.from({ length: arraySize }, () =>
+      Math.floor(Math.random() * arraySize)
+    );
+    if (this.visualizer) {
+      this.visualizer.array = array;
+      this.visualizer.init();
+      this.visualizer.generateBars();
+    }
+
+    if (!this.array) {
+      return array;
+    }
+    this.array = array;
   }
 
   compare(index1, index2) {
@@ -266,9 +279,9 @@ class Algorithm {
   }
 }
 
-let algo = new Algorithm(100, 0);
-algo.visualizer.init();
-algo.visualizer.generateBars();
+const arraySize = document.getElementById("arraySize");
+let algo = new Algorithm(0);
+algo.setArraySize();
 
 function generate() {
   window.location.reload();
