@@ -12,7 +12,7 @@ class Visualizer {
     this.context = this.canvas.getContext("2d");
     this.maxHeight = Number(this.container.offsetHeight);
     this.maxWidth = Number(this.container.offsetWidth);
-    this.width = Number(this.maxWidth / this.array.length);
+    this.width = Number(Math.floor(this.maxWidth / this.array.length));
   }
 
   init() {
@@ -41,16 +41,18 @@ class Visualizer {
   }
 
   drawOneBar(index) {
-    this.context.clip();
+    // this.context.clip();
     this.context.clearRect(this.x(index), 0, this.width, this.maxHeight);
     this.context.beginPath();
+    console.log("x", this.x(index));
+    console.log("width", this.width);
     this.context.rect(
       this.x(index),
       this.y(index),
       this.width,
       this.height(index)
     );
-    this.context.stroke();
+    // this.context.stroke();
     this.context.fill();
     this.context.restore();
   }
