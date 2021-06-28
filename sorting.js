@@ -18,7 +18,7 @@ class Visualizer {
   init() {
     this.container.innerHTML = "";
     this.canvas.setAttribute("height", `${this.maxHeight}`);
-    this.canvas.setAttribute("width", `${this.maxWidth}`);
+    this.canvas.setAttribute("width", `${this.array.length * this.width}`);
     this.container.appendChild(this.canvas);
     this.context.fillStyle = "rgb(24, 190, 255)";
     this.context.strokeStyle = "black";
@@ -41,18 +41,14 @@ class Visualizer {
   }
 
   drawOneBar(index) {
-    // this.context.clip();
     this.context.clearRect(this.x(index), 0, this.width, this.maxHeight);
     this.context.beginPath();
-    console.log("x", this.x(index));
-    console.log("width", this.width);
     this.context.rect(
       this.x(index),
       this.y(index),
       this.width,
       this.height(index)
     );
-    // this.context.stroke();
     this.context.fill();
     this.context.restore();
   }
