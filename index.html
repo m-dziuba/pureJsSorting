@@ -8,44 +8,65 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
   
   <title>Sorting Visualizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap" rel="stylesheet">
   <link href="style.css" rel="stylesheet"/>
 </head>
 <body>
-<section class="head">Sorting Algorithms Visualizer</section>
-<div class="data-container">
-
-</div>
-<canvas id="canvas"></canvas>
-
-<button class="btn1" onclick="algo.setArray()" id="Button1">
-  Generate New Array
-</button>
-
-<button class="btn2"
-        onclick="algo.sort()" id="Button2">
-  Sort
-</button>
-
-<label for="arraySize">Array size</label>
-<select name="arraySize" id="arraySize" onchange="algo.setArray()">
-  <option selected value="50">50</option>
-  <option value="100">100</option>
-  <option value="250">250</option>
-  <option value="1000">1000</option>
-</select>
-
-<label for="algorithm">Algorithm</label>
-<select name="algorithm" id="algorithm" onchange="algo.setAlgorithm()">
-  <option selected value="selection">Selection Sort</option>
-  <option value="bubble">Bubble Sort</option>
-  <option value="insertion">Insertion Sort</option>
-  <option value="merge">Merge Sort</option>
-  <option value="quick">Quick Sort</option>
-</select>
-
-<label for="delay">Delay</label>
-<input type="text" id="delay" onchange="algo.setDelay()" value="100">
+<section class="content">
+  <h1>Sorting Algorithms Visualizer</h1>
+  
+  <div class="menu container-fluid">
+    <div class="row">
+      <button class="btn btn-primary col" onclick="algo.setArray()" id="Button1">
+        Generate New Array
+      </button>
+      
+      <button class="btn btn-primary col"
+              onclick="algo.sort()" id="Button2">
+        Sort
+      </button>
+      <div class="form-floating col">
+        <select class="form-select" name="arraySize" id="arraySize" onchange="algo.setArray()">
+          <option selected value="50">50</option>
+          <option value="100">100</option>
+          <option value="250">250</option>
+          <option value="1000">1000</option>
+        </select>
+        <label for="arraySize">Array size</label>
+      </div>
+      
+      <div class="form-floating col">
+        <select class="form-select" name="algorithm" id="algorithm" onchange="algo.setAlgorithm()">
+          <option selected value="selection">Selection Sort</option>
+          <option value="bubble">Bubble Sort</option>
+          <option value="insertion">Insertion Sort</option>
+          <option value="merge">Merge Sort</option>
+          <option value="quick">Quick Sort</option>
+        </select>
+        <label for="algorithm">Algorithm</label>
+      </div>
+      
+      <div class="form-floating col">
+        <input type="text" class="form-control" id="delay" onchange="algo.setDelay()" value="100">
+        <label for="delay">Delay</label>
+      </div>
+    </div>
+  </div>
+  <div class="data-container">
+  
+  </div>
+  
+  <canvas id="canvas"></canvas>
+</section>
 </body>
 
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 <script src="sorting.js"></script>
 </html>
