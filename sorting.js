@@ -95,7 +95,7 @@ class Visualizer {
 
 class Algorithm {
   constructor() {
-    this.delay = 100;
+    this.delay = 0;
     this.array = this.setArray();
     this.visualizer = new Visualizer(this.array);
     this.algorithm = this.selectionSort;
