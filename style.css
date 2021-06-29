@@ -2,12 +2,13 @@ body {
   margin: 0 auto;
   background: rgb(255, 255, 255);
   background: linear-gradient(165deg, rgba(255, 255, 255, 1) 0%, rgba(14, 56, 236, 1) 46%, rgba(8, 8, 108, 1) 100%);
+  background-repeat: revert;
   font-family: Lato, sans-serif;
 }
 
 .content {
   margin: 2.5vh auto;
-  width: 75%;
+  width: 85%;
   height: 95vh;
 }
 
@@ -17,11 +18,24 @@ h1 {
   font-weight: 400;
 }
 .row{
-  gap: 1em;
+  gap: 1vw;
+  margin-right: 0;
+  margin-left: 0;
 }
 .row>*{
     padding-left: 0;
-  padding-right: 0;
+    padding-right: 0;
+}
+.form-select{
+  background-image: none;
+  padding-right: .75rem;
+}
+.container-fluid{
+  padding: 0;
+}
+
+label{
+  font-size: 0.875em;
 }
 
 select {
@@ -29,7 +43,7 @@ select {
 }
 
 .data-container {
-  height: 70vh;
+  height: 70%;
   margin: 1em auto;
   display: flex;
   justify-content: center;
@@ -43,3 +57,4 @@ canvas{
   width: 100%;
   height: 100%;
 }
+

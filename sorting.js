@@ -256,7 +256,3 @@ class Algorithm {
 
 let algo = new Algorithm(1);
 algo.setArray();
-
-function generate() {
-  window.location.reload();
-}
