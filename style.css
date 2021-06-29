@@ -37,3 +37,9 @@ select {
   background: #fff;
   border-radius: 1em;
 }
+
+canvas{
+  padding: 0 1em;
+  width: 100%;
+  height: 100%;
+}
