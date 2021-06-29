@@ -17,7 +17,7 @@
 </div>
 <canvas id="canvas"></canvas>
 
-<button class="btn1" onclick="generate()" id="Button1">
+<button class="btn1" onclick="algo.setArray()" id="Button1">
   Generate New Array
 </button>
 
@@ -27,11 +27,11 @@
 </button>
 
 <label for="arraySize">Array size</label>
-<select name="arraySize" id="arraySize" onchange="algo.setArraySize()">
-  <option value="50">50</option>
+<select name="arraySize" id="arraySize" onchange="algo.setArray()">
+  <option selected value="50">50</option>
   <option value="100">100</option>
   <option value="250">250</option>
-  <option selected value="1000">1000</option>
+  <option value="1000">1000</option>
 </select>
 
 <label for="algorithm">Algorithm</label>
@@ -42,6 +42,9 @@
   <option value="merge">Merge Sort</option>
   <option value="quick">Quick Sort</option>
 </select>
+
+<label for="delay">Delay</label>
+<input type="text" id="delay" onchange="algo.setDelay()" value="100">
 </body>
 
 <script src="sorting.js"></script>

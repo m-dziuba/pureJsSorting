@@ -80,13 +80,14 @@ class Visualizer {
 }
 
 class Algorithm {
-  constructor(delay = 300) {
-    this.array = this.setArraySize();
+  constructor() {
+    this.delay = 100;
+    this.array = this.setArray();
     this.algorithm = this.selectionSort;
-    this.visualizer = new Visualizer(this.array, delay);
+    this.visualizer = new Visualizer(this.array, this.delay);
   }
 
-  setArraySize() {
+  setArray() {
     const arraySize = parseInt(document.getElementById("arraySize").value, 10);
     const array = Array.from({ length: arraySize }, () =>
       Math.floor(Math.random() * arraySize)
@@ -105,7 +106,7 @@ class Algorithm {
 
   setAlgorithm() {
     const selectedAlgorithm = document.getElementById("algorithm").value;
-    this.setArraySize();
+    this.setArray();
     if (selectedAlgorithm === "selection") {
       this.algorithm = this.selectionSort;
     } else if (selectedAlgorithm === "bubble") {
@@ -119,13 +120,19 @@ class Algorithm {
     }
   }
 
+  setDelay() {
+    this.delay = parseInt(document.getElementById("delay").value);
+  }
+
   sort() {
     const visualizer = this.visualizer;
     const sort = this.algorithm();
     const animate = () => {
-      requestAnimationFrame(animate);
-      visualizer.generateBars();
-      sort.next();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+        visualizer.generateBars();
+        sort.next();
+      }, this.delay);
     };
     animate();
   }
@@ -248,7 +255,7 @@ class Algorithm {
 }
 
 let algo = new Algorithm(1);
-algo.setArraySize();
+algo.setArray();
 
 function generate() {
   window.location.reload();
