@@ -21,7 +21,6 @@ class Visualizer {
     this.canvas.setAttribute("height", `${this.maxHeight}`);
     this.canvas.setAttribute("width", `${this.array.length * this.width}`);
     this.container.appendChild(this.canvas);
-    this.context.fillStyle = "rgb(24, 190, 255)";
     this.context.save();
   }
 
@@ -39,8 +38,14 @@ class Visualizer {
     return (this.maxHeight / this.array.length) * this.array[index];
   }
 
+  rainbow(index) {
+    const h = Math.floor((360 / this.maxHeight) * this.height(index));
+    return "hsl(" + h + ",100%,50%)";
+  }
+
   drawOneBar(index) {
     this.context.clearRect(this.x(index), 0, this.width, this.maxHeight);
+    this.context.fillStyle = this.rainbow(index);
     this.context.beginPath();
     this.context.rect(
       this.x(index),
@@ -56,28 +61,6 @@ class Visualizer {
     for (let i = from; i < to; i += 1) {
       this.drawOneBar(i);
     }
-  }
-
-  inspected(index) {
-    this.context.save();
-    this.context.fillStyle = "darkblue";
-    this.drawOneBar(index);
-  }
-
-  compared(index) {
-    this.context.save();
-    this.context.fillStyle = "red";
-    this.drawOneBar(index);
-  }
-
-  finished(index) {
-    this.context.save();
-    this.context.fillStyle = "green";
-    this.drawOneBar(index);
-  }
-
-  unmark(index) {
-    this.drawOneBar(index);
   }
 
   enableButtons() {
@@ -152,16 +135,12 @@ class Algorithm {
     let minIndex = 0;
     for (let i = 0; i < this.array.length; i++) {
       minIndex = i;
-      this.visualizer.inspected(i);
       for (let j = i + 1; j < this.array.length; j++) {
-        this.visualizer.compared(j);
         if (this.array[minIndex] > this.array[j]) {
           if (minIndex !== i) {
-            this.visualizer.unmark(minIndex);
           }
           minIndex = j;
         } else {
-          this.visualizer.unmark(j);
         }
       }
       if (i !== minIndex) {
@@ -171,7 +150,6 @@ class Algorithm {
         ];
         yield i;
       }
-      this.visualizer.unmark(minIndex);
     }
   }
 
@@ -182,8 +160,6 @@ class Algorithm {
     while (swapping) {
       swapping = false;
       for (let i = 0; i < this.array.length - passes - 1; i++) {
-        this.visualizer.compared(i);
-        this.visualizer.inspected(i + 1);
         if (this.array[i] > this.array[i + 1]) {
           [this.array[i], this.array[i + 1]] = [
             this.array[i + 1],
@@ -191,8 +167,6 @@ class Algorithm {
           ];
           swapping = true;
         }
-        this.visualizer.unmark(i);
-        this.visualizer.inspected(i + 1);
       }
       yield swapping;
       passes += 1;
@@ -202,46 +176,46 @@ class Algorithm {
   *insertionSort() {
     for (let i = 1; i < this.array.length; i++) {
       for (let j = i; j > 0 && this.array[j] < this.array[j - 1]; j--) {
-        // this.visualizer.unmark(j);
-        // this.visualizer.inspected(i);
-        // this.visualizer.compared(j - 1);
         [this.array[j], this.array[j - 1]] = [this.array[j - 1], this.array[j]];
       }
       yield i;
-
-      this.visualizer.unmark(i);
     }
-    // for (let i = 0; i < this.array.length; i++) {
-    //   this.visualizer.finished(i);
-    // }
   }
 
-  *mergeSort(startIndex = null, endIndex = null) {
-    if (startIndex === null) {
-      [startIndex, endIndex] = [0, this.array.length];
-    }
-    if (endIndex - startIndex > 1) {
-      let middleIndex = Math.floor((endIndex + startIndex) / 2);
-      yield* this.mergeSort(startIndex, middleIndex);
-      yield* this.mergeSort(middleIndex, endIndex);
-      let i = 0;
-      let j = 0;
-      for (let k = startIndex; k < endIndex; k++) {
-        this.visualizer.inspected(k);
-        if (i + 1 < endIndex - startIndex && j * 2 < endIndex - startIndex) {
-          this.visualizer.compared(middleIndex + j);
-          if (this.array[startIndex + i] < this.array[middleIndex + j]) {
-            i++;
-          } else {
-            this.array.insert(k, this.array[middleIndex + j]);
-            i++;
-            j++;
-            this.array.splice(middleIndex + j, 1);
-            yield 1;
-          }
+  *mergeSort() {
+    const merge = (array, left, step) => {
+      let right = left + step;
+      let end = Math.min(left + step * 2 - 1, array.length - 1);
+      let leftIndex = left;
+      let rightIndex = right;
+      let temp = [];
+
+      for (let i = left; i <= end; i++) {
+        if (
+          (array[leftIndex] <= array[rightIndex] || rightIndex > end) &&
+          leftIndex < right
+        ) {
+          temp[i] = array[leftIndex];
+          leftIndex++;
+        } else {
+          temp[i] = array[rightIndex];
+          rightIndex++;
         }
-        this.visualizer.unmark(k);
       }
+      for (let j = left; j <= end; j++) {
+        array[j] = temp[j];
+      }
+    };
+
+    let step = 1;
+    while (step < this.array.length) {
+      let left = 0;
+      while (left + step < this.array.length) {
+        merge(this.array, left, step);
+        left += step * 2;
+        yield step;
+      }
+      step *= 2;
     }
   }
 
@@ -252,22 +226,16 @@ class Algorithm {
     if (endIndex - startIndex > 0) {
       let pivot = this.array[endIndex];
 
-      this.visualizer.inspected(endIndex);
       let i = startIndex;
 
       for (let j = startIndex; j < endIndex; j++) {
-        this.visualizer.compared(j);
-        this.visualizer.compared(i);
         if (this.array[j] < pivot) {
           i++;
           [this.array[i - 1], this.array[j]] = [
             this.array[j],
             this.array[i - 1],
           ];
-          yield 1;
         }
-        this.visualizer.unmark(i);
-        this.visualizer.unmark(j);
       }
       [this.array[i], this.array[endIndex]] = [
         this.array[endIndex],
