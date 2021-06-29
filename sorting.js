@@ -80,8 +80,6 @@ class Visualizer {
     this.drawOneBar(index);
   }
 
-  pause = (delay = this.delay) => new Promise((res) => setTimeout(res, delay));
-
   enableButtons() {
     document.getElementById("Button1").disabled = false;
     document.getElementById("Button1").style.backgroundColor = "#6f459e";
