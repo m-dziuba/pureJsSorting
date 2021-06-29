@@ -124,52 +124,40 @@ class Algorithm {
   }
 
   setAlgorithm() {
-    const algorithm = document.getElementById("algorithm").value;
+    const selectedAlgorithm = document.getElementById("algorithm").value;
     this.setArraySize();
-    if (algorithm === "selection") {
-      console.log(1);
+    if (selectedAlgorithm === "selection") {
       this.algorithm = this.selectionSort;
-    } else if (algorithm === "bubble") {
-      console.log(2);
+    } else if (selectedAlgorithm === "bubble") {
       this.algorithm = this.bubbleSort;
-    } else if (algorithm === "insertion") {
+    } else if (selectedAlgorithm === "insertion") {
       this.algorithm = this.insertionSort;
-    } else if (algorithm === "merge") {
+    } else if (selectedAlgorithm === "merge") {
       this.algorithm = this.mergeSort;
-    } else if (algorithm === "quick") {
+    } else if (selectedAlgorithm === "quick") {
       this.algorithm = this.quickSort;
     }
   }
 
-  compare(index1, index2) {
-    let value1 = this.array[index1];
-    let value2 = this.array[index2];
-    if (value1 > value2) {
-      return true;
-    } else if (value1 >= value2) {
-      return "largerOrEqual";
-    }
-    return value1 > value2;
+  sort() {
+    const visualizer = this.visualizer;
+    const sort = this.algorithm();
+    const animate = () => {
+      requestAnimationFrame(animate);
+      visualizer.generateBars();
+      sort.next();
+    };
+    animate();
   }
 
-  swap(index1, index2) {
-    [this.array[index1], this.array[index2]] = [
-      this.array[index2],
-      this.array[index1],
-    ];
-    this.visualizer.generateBars();
-  }
-
-  async selectionSort() {
+  *selectionSort() {
     let minIndex = 0;
     for (let i = 0; i < this.array.length; i++) {
       minIndex = i;
       this.visualizer.inspected(i);
       for (let j = i + 1; j < this.array.length; j++) {
         this.visualizer.compared(j);
-        await this.visualizer.pause();
-
-        if (this.compare(minIndex, j)) {
+        if (this.array[minIndex] > this.array[j]) {
           if (minIndex !== i) {
             this.visualizer.unmark(minIndex);
           }
@@ -178,14 +166,18 @@ class Algorithm {
           this.visualizer.unmark(j);
         }
       }
-      this.swap(i, minIndex);
-      await this.visualizer.pause(300);
+      if (i !== minIndex) {
+        [this.array[i], this.array[minIndex]] = [
+          this.array[minIndex],
+          this.array[i],
+        ];
+        yield i;
+      }
       this.visualizer.unmark(minIndex);
-      this.visualizer.finished(i);
     }
   }
 
-  async bubbleSort() {
+  *bubbleSort() {
     let swapping = true;
     let passes = 0;
 
@@ -194,57 +186,52 @@ class Algorithm {
       for (let i = 0; i < this.array.length - passes - 1; i++) {
         this.visualizer.compared(i);
         this.visualizer.inspected(i + 1);
-
-        await this.visualizer.pause();
-
-        if (this.compare(i, i + 1)) {
-          this.swap(i, i + 1);
+        if (this.array[i] > this.array[i + 1]) {
+          [this.array[i], this.array[i + 1]] = [
+            this.array[i + 1],
+            this.array[i],
+          ];
           swapping = true;
-          await this.visualizer.pause();
         }
         this.visualizer.unmark(i);
         this.visualizer.inspected(i + 1);
-        await this.visualizer.pause();
       }
-      this.visualizer.finished(this.array.length - passes - 1);
+      yield swapping;
       passes += 1;
     }
   }
 
-  async insertionSort() {
+  *insertionSort() {
     for (let i = 1; i < this.array.length; i++) {
       for (let j = i; j > 0 && this.array[j] < this.array[j - 1]; j--) {
-        this.visualizer.unmark(j);
-        this.visualizer.inspected(i);
-        this.visualizer.compared(j - 1);
-        await this.visualizer.pause();
+        // this.visualizer.unmark(j);
+        // this.visualizer.inspected(i);
+        // this.visualizer.compared(j - 1);
         [this.array[j], this.array[j - 1]] = [this.array[j - 1], this.array[j]];
       }
-      this.visualizer.generateBars();
+      yield i;
+
       this.visualizer.unmark(i);
     }
-
-    for (let i = 0; i < this.array.length; i++) {
-      this.visualizer.finished(i);
-      await this.visualizer.pause(1);
-    }
+    // for (let i = 0; i < this.array.length; i++) {
+    //   this.visualizer.finished(i);
+    // }
   }
 
-  async mergeSort(startIndex = null, endIndex = null) {
+  *mergeSort(startIndex = null, endIndex = null) {
     if (startIndex === null) {
       [startIndex, endIndex] = [0, this.array.length];
     }
     if (endIndex - startIndex > 1) {
       let middleIndex = Math.floor((endIndex + startIndex) / 2);
-      await this.mergeSort(startIndex, middleIndex);
-      await this.mergeSort(middleIndex, endIndex);
+      yield* this.mergeSort(startIndex, middleIndex);
+      yield* this.mergeSort(middleIndex, endIndex);
       let i = 0;
       let j = 0;
       for (let k = startIndex; k < endIndex; k++) {
         this.visualizer.inspected(k);
         if (i + 1 < endIndex - startIndex && j * 2 < endIndex - startIndex) {
           this.visualizer.compared(middleIndex + j);
-          await this.visualizer.pause();
           if (this.array[startIndex + i] < this.array[middleIndex + j]) {
             i++;
           } else {
@@ -252,7 +239,7 @@ class Algorithm {
             i++;
             j++;
             this.array.splice(middleIndex + j, 1);
-            this.visualizer.generateBars(k, middleIndex + j);
+            yield 1;
           }
         }
         this.visualizer.unmark(k);
@@ -260,7 +247,7 @@ class Algorithm {
     }
   }
 
-  async quickSort(startIndex = null, endIndex = null) {
+  *quickSort(startIndex = null, endIndex = null) {
     if (startIndex === null) {
       [startIndex, endIndex] = [0, this.array.length - 1];
     }
@@ -273,33 +260,29 @@ class Algorithm {
       for (let j = startIndex; j < endIndex; j++) {
         this.visualizer.compared(j);
         this.visualizer.compared(i);
-        await this.visualizer.pause();
         if (this.array[j] < pivot) {
           i++;
-
           [this.array[i - 1], this.array[j]] = [
             this.array[j],
             this.array[i - 1],
           ];
-          this.visualizer.generateBars();
+          yield 1;
         }
         this.visualizer.unmark(i);
         this.visualizer.unmark(j);
-        await this.visualizer.pause();
       }
       [this.array[i], this.array[endIndex]] = [
         this.array[endIndex],
         this.array[i],
       ];
-      this.visualizer.generateBars();
-      await this.quickSort(startIndex, i - 1);
-      await this.quickSort(i + 1, endIndex);
+      yield 1;
+      yield* this.quickSort(startIndex, i - 1);
+      yield* this.quickSort(i + 1, endIndex);
     }
   }
 }
 
-const arraySize = document.getElementById("arraySize");
-let algo = new Algorithm(0);
+let algo = new Algorithm(1);
 algo.setArraySize();
 
 function generate() {

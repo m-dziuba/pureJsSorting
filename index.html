@@ -22,7 +22,7 @@
 </button>
 
 <button class="btn2"
-        onclick="algo.algorithm()" id="Button2">
+        onclick="algo.sort()" id="Button2">
   Sort
 </button>
 
@@ -31,12 +31,12 @@
   <option value="50">50</option>
   <option value="100">100</option>
   <option value="250">250</option>
-  <option value="1000">1000</option>
+  <option selected value="1000">1000</option>
 </select>
 
 <label for="algorithm">Algorithm</label>
 <select name="algorithm" id="algorithm" onchange="algo.setAlgorithm()">
-  <option value="selection">Selection Sort</option>
+  <option selected value="selection">Selection Sort</option>
   <option value="bubble">Bubble Sort</option>
   <option value="insertion">Insertion Sort</option>
   <option value="merge">Merge Sort</option>
