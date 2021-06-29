@@ -3,18 +3,32 @@ Array.prototype.insert = function (index, item) {
 };
 
 class Visualizer {
-  constructor(array, delay) {
+  constructor(array) {
     this.array = array;
-    this.delay = delay;
     this.container = document.querySelector(".data-container");
     this.canvas = document.getElementById("canvas");
     this.context = this.canvas.getContext("2d");
     this.maxHeight = Number(this.container.offsetHeight);
     this.maxWidth = Number(this.container.offsetWidth);
-    this.width = 0;
+    this.width = Number(Math.floor(this.maxWidth / this.array.length));
   }
 
   init() {
+    const selectArraySize = document.getElementById("arraySize");
+    if (!selectArraySize.length) {
+      const breakpoints = [0.1, 0.25, 0.5, 0.75, 1];
+      for (let i = 0; i < breakpoints.length; i++) {
+        let option = document.createElement("option");
+        option.text = `${breakpoints[i] * 100}%`;
+        option.value = `${Math.floor(breakpoints[i] * this.maxWidth)}`;
+        if (breakpoints[i] === 1) {
+          option.selected = true;
+        }
+        selectArraySize.add(option);
+      }
+      console.log(1);
+    }
+
     this.container.innerHTML = "";
     this.width = Number(Math.floor(this.maxWidth / this.array.length));
     this.canvas.setAttribute("height", `${this.maxHeight}`);
@@ -83,11 +97,12 @@ class Algorithm {
   constructor() {
     this.delay = 100;
     this.array = this.setArray();
+    this.visualizer = new Visualizer(this.array);
     this.algorithm = this.selectionSort;
-    this.visualizer = new Visualizer(this.array, this.delay);
   }
 
   setArray() {
+    console.log(2);
     const arraySize = parseInt(document.getElementById("arraySize").value, 10);
     const array = Array.from({ length: arraySize }, () =>
       Math.floor(Math.random() * arraySize)
@@ -254,5 +269,6 @@ class Algorithm {
   }
 }
 
-let algo = new Algorithm(1);
+let algo = new Algorithm();
+algo.visualizer.init();
 algo.setArray();
