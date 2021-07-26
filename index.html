@@ -29,28 +29,39 @@
           <button
             class="btn btn-primary col"
             onclick="algo.setArray()"
-            id="Button1"
+            id="array-btn"
           >
             New Array
+          </button>
+          
+           <button
+            class="btn btn-primary col"
+            onclick="algo.reset()"
+            id="reset-btn"
+            hidden
+          >
+            Reset
           </button>
 
           <button
             class="btn btn-primary col"
-            onclick="algo.sort()"
-            id="Button2"
+            onclick="algo.handleClickOnSort()"
+            id="algorithm-btn"
           >
             Sort
           </button>
+          
+          
           <div class="row" id="pop">
             <div class="form-floating col">
               <select
                 class="form-select"
-                name="arraySize"
-                id="arraySize"
+                name="array-size"
+                id="array-size"
                 onchange="algo.setArray()"
               >
               </select>
-              <label for="arraySize">Array size</label>
+              <label for="array-size">Array size</label>
             </div>
 
             <div class="form-floating col">

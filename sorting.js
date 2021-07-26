@@ -1,10 +1,7 @@
-Array.prototype.insert = function (index, item) {
-  this.splice(index, 0, item);
-};
-
 class Visualizer {
-  constructor(array) {
+  constructor(array, delay) {
     this.array = array;
+    this.delay = delay;
     this.container = document.querySelector(".data-container");
     this.canvas = document.getElementById("canvas");
     this.context = this.canvas.getContext("2d");
@@ -14,7 +11,7 @@ class Visualizer {
   }
 
   init() {
-    const selectArraySize = document.getElementById("arraySize");
+    const selectArraySize = document.getElementById("array-size");
     if (!selectArraySize.length) {
       const breakpoints = [0.1, 0.25, 0.5, 0.75, 1];
       for (let i = 0; i < breakpoints.length; i++) {
@@ -26,7 +23,6 @@ class Visualizer {
         }
         selectArraySize.add(option);
       }
-      console.log(1);
     }
 
     this.container.innerHTML = "";
@@ -71,25 +67,31 @@ class Visualizer {
   }
 
   generateBars(from = 0, to = this.array.length) {
-    for (let i = from; i < to; i += 1) {
-      this.drawOneBar(i);
-    }
+    const that = this;
+    return new Promise((resolve) => {
+      setTimeout(function () {
+        for (let i = from; i < to; i += 1) {
+          that.drawOneBar(i);
+        }
+        resolve();
+      }, this.delay);
+    });
   }
 
-  enableButtons() {
-    document.getElementById("Button1").disabled = false;
-    document.getElementById("Button1").style.backgroundColor = "#6f459e";
+  toggleSettings() {
+    const arraySize = document.getElementById("array-size");
+    const algorithm = document.getElementById("algorithm");
+    const delay = document.getElementById("delay");
+    const newArrayButton = document.getElementById("array-btn");
+    const sortButton = document.getElementById("algorithm-btn");
+    const restartButton = document.getElementById("reset-btn");
 
-    document.getElementById("Button2").disabled = false;
-    document.getElementById("Button2").style.backgroundColor = "#6f459e";
-  }
-
-  disableButtons() {
-    document.getElementById("Button1").disabled = true;
-    document.getElementById("Button1").style.backgroundColor = "#d8b6ff";
-
-    document.getElementById("Button2").disabled = true;
-    document.getElementById("Button2").style.backgroundColor = "#d8b6ff";
+    newArrayButton.hidden = !newArrayButton.hidden;
+    restartButton.hidden = !restartButton.hidden;
+    sortButton.disabled = !sortButton.disabled;
+    arraySize.disabled = !arraySize.disabled;
+    algorithm.disabled = !algorithm.disabled;
+    delay.disabled = !delay.disabled;
   }
 }
 
@@ -97,20 +99,19 @@ class Algorithm {
   constructor() {
     this.delay = 0;
     this.array = this.setArray();
-    this.visualizer = new Visualizer(this.array);
+    this.visualizer = new Visualizer(this.array, this.delay);
     this.algorithm = this.selectionSort;
   }
 
   setArray() {
-    console.log(2);
-    const arraySize = parseInt(document.getElementById("arraySize").value, 10);
+    const arraySize = parseInt(document.getElementById("array-size").value, 10);
     const array = Array.from({ length: arraySize }, () =>
       Math.floor(Math.random() * arraySize)
     );
     if (this.visualizer) {
       this.visualizer.array = array;
       this.visualizer.init();
-      this.visualizer.generateBars();
+      this.visualizer.generateBars().then();
     }
 
     if (!this.array) {
@@ -137,22 +138,20 @@ class Algorithm {
 
   setDelay() {
     this.delay = parseInt(document.getElementById("delay").value);
+    this.visualizer.delay = this.delay;
   }
 
-  sort() {
-    const visualizer = this.visualizer;
-    const sort = this.algorithm();
-    const animate = () => {
-      setTimeout(() => {
-        requestAnimationFrame(animate);
-        visualizer.generateBars();
-        sort.next();
-      }, this.delay);
-    };
-    animate();
+  reset() {
+    location.reload();
   }
 
-  *selectionSort() {
+  async handleClickOnSort() {
+    this.visualizer.toggleSettings();
+    await this.algorithm();
+    this.visualizer.toggleSettings();
+  }
+
+  async selectionSort() {
     let minIndex = 0;
     for (let i = 0; i < this.array.length; i++) {
       minIndex = i;
@@ -169,12 +168,12 @@ class Algorithm {
           this.array[minIndex],
           this.array[i],
         ];
-        yield i;
+        await this.visualizer.generateBars();
       }
     }
   }
 
-  *bubbleSort() {
+  async bubbleSort() {
     let swapping = true;
     let passes = 0;
 
@@ -189,21 +188,21 @@ class Algorithm {
           swapping = true;
         }
       }
-      yield swapping;
+      await this.visualizer.generateBars();
       passes += 1;
     }
   }
 
-  *insertionSort() {
+  async insertionSort() {
     for (let i = 1; i < this.array.length; i++) {
       for (let j = i; j > 0 && this.array[j] < this.array[j - 1]; j--) {
         [this.array[j], this.array[j - 1]] = [this.array[j - 1], this.array[j]];
       }
-      yield i;
+      await this.visualizer.generateBars();
     }
   }
 
-  *mergeSort() {
+  async mergeSort() {
     const merge = (array, left, step) => {
       let right = left + step;
       let end = Math.min(left + step * 2 - 1, array.length - 1);
@@ -234,13 +233,13 @@ class Algorithm {
       while (left + step < this.array.length) {
         merge(this.array, left, step);
         left += step * 2;
-        yield step;
+        await this.visualizer.generateBars();
       }
       step *= 2;
     }
   }
 
-  *quickSort(startIndex = null, endIndex = null) {
+  async quickSort(startIndex = null, endIndex = null) {
     if (startIndex === null) {
       [startIndex, endIndex] = [0, this.array.length - 1];
     }
@@ -257,14 +256,15 @@ class Algorithm {
             this.array[i - 1],
           ];
         }
+        await this.visualizer.generateBars();
       }
       [this.array[i], this.array[endIndex]] = [
         this.array[endIndex],
         this.array[i],
       ];
-      yield 1;
-      yield* this.quickSort(startIndex, i - 1);
-      yield* this.quickSort(i + 1, endIndex);
+      await this.visualizer.generateBars();
+      await this.quickSort(startIndex, i - 1);
+      await this.quickSort(i + 1, endIndex);
     }
   }
 }
